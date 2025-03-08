@@ -1,19 +1,32 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import os
 import asyncio
 import webserver
+from itertools import cycle
 
 TOKEN = os.environ["DISCORD_TOKEN"]
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
-bot_status = "Mace Submodes"
+status_messages = cycle([
+    "Mace Pot", 
+    "OG Mace", 
+    "Rod Mace", 
+    "Rocket Mace", 
+    "DiaMace", 
+    "Classic Mace", 
+    "LT Mace"
+])
+
+@tasks.loop(seconds=180)
+async def change_status():
+    await bot.change_presence(activity=discord.Game(next(status_messages)))
 
 @bot.event
 async def on_ready():
     print('Hello! Mace Submodes Bot is Ready!')
-    await bot.change_presence(activity=discord.Game(bot_status))
+    change_status.start() 
     try:
         sync_commands = await bot.tree.sync()
         print(f"Synced {len(sync_commands)} commands.")
