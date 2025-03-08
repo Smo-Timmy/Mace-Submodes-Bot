@@ -608,7 +608,7 @@ class JoinWaitlistDropdown(discord.ui.Select):
                 return
             waitlist_role = discord.utils.get(interaction.guild.roles, name=WAITLIST_NAMES[list.index(GAMEMODES_TIERS, selected_value)])
             if playerInfoDict[interaction.user.id]["testing_ticket_ids"][selected_value] != 0:
-                await interaction.response.send_message(f"You already have a ticket open for this gamemode: <#{playerInfoDict[interaction.user.id]["testing_ticket_ids"][selected_value]}>", ephemeral=True) 
+                await interaction.response.send_message(f'You already have a ticket open for this gamemode: <#{playerInfoDict[interaction.user.id]["testing_ticket_ids"][selected_value]}>', ephemeral=True) 
                 return
             if not waitlist_role:
                 await interaction.response.send_message("Waitlist Role does not Exist", ephemeral=True)
