@@ -60,6 +60,7 @@ SUBMODES_RANKS = ["Submodes Master",
                   "Submodes Cadet", 
                   "Submodes Novice", 
                   "Submodes Rookie"]
+HIGHTIERS = ["HT1", "LT1", "HT2", "LT2", "HT3"]
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -606,6 +607,32 @@ class JoinWaitlistDropdown(discord.ui.Select):
             if playerInfoDict[interaction.user.id]["testing_server"] == "":
                 await interaction.response.send_message("You have to verify before entering the waitlist", ephemeral=True)
                 return
+            if playerInfoDict[interaction.user.id]["tiers"][selected_value] in HIGHTIERS:
+                if playerInfoDict[interaction.user.id]["tiers"][selected_value] == "HT1":
+                    await interaction.response.send_message(f"You are HT1 in {selected_value}, you cannot test further.", ephemeral=True)
+                    return
+                testee_id = interaction.user.id
+                LoadInfoDict()
+                username = playerInfoDict[testee_id]["mc_user"]
+                region = playerInfoDict[testee_id]["player_region"]
+                previous_tier = playerInfoDict[testee_id]["tiers"][selected_value]
+                if not previous_tier:
+                    previous_tier = "Unranked"
+                ticket_category = discord.utils.get(interaction.guild.categories, name=selected_value)
+                testee_user = interaction.guild.get_member(testee_id)
+                tier_index = HIGHTIERS.index(previous_tier) - 1
+                tier = HIGHTIERS[tier_index]
+                channel = await interaction.guild.create_text_channel(f"{testee_user}-{tier}", category=ticket_category)
+                playerInfoDict[testee_id]["testing_ticket_ids"][selected_value] = channel.id
+                testing_message = discord.Embed(title=f"{interaction.user.name}'s Information", color=discord.Color.blue())
+                testing_message.add_field(name="Region:",value=region,inline=False)
+                testing_message.add_field(name="Username:",value=username,inline=False)
+                testing_message.add_field(name="Previous Rank:",value=previous_tier,inline=False)
+                testing_message.set_thumbnail(url=interaction.user.avatar)
+                await channel.send(content=interaction.user.mention, embed=testing_message)
+                WriteInfoDict()
+                await interaction.response.send_message(f"New High Testing Ticket Created: {channel.mention}", ephemeral=True)
+                return
             waitlist_role = discord.utils.get(interaction.guild.roles, name=WAITLIST_NAMES[list.index(GAMEMODES_TIERS, selected_value)])
             if playerInfoDict[interaction.user.id]["testing_ticket_ids"][selected_value] != 0:
                 await interaction.response.send_message(f'You already have a ticket open for this gamemode: <#{playerInfoDict[interaction.user.id]["testing_ticket_ids"][selected_value]}>', ephemeral=True) 
@@ -649,7 +676,7 @@ class VerificationModal(discord.ui.Modal, title="Verify your account details"):
         playerInfoDict[interaction.user.id]["testing_server"] = self.testing_server.value
         WriteInfoDict()
         await interaction.response.send_message("You have successfully verified. You may join the waitlist", ephemeral=True)
-        
+
 def CalculateSubmodesRank(user_id):
     points = 0
     for gamemode in playerInfoDict[user_id]["tiers"]:
