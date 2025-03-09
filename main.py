@@ -2,10 +2,11 @@ import discord
 from discord.ext import commands, tasks
 import os
 import asyncio
-import webserver
+from dotenv import load_dotenv
 from itertools import cycle
 
-TOKEN = os.environ["DISCORD_TOKEN"]
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -49,5 +50,4 @@ async def main():
         await load()
         await bot.start(TOKEN)
 
-webserver.keep_alive()
 asyncio.run(main())
