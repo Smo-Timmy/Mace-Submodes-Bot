@@ -82,7 +82,8 @@ class Waitlist(commands.Cog):
         else:
             reqtest_description = """
             Upon applying, you will be added to a waitlist channel.
-            Here you will be pinged when a tester of your region is available.
+            Here you will be pinged when a tester of your gamemode is available.
+            If you are HT3 or higher, a high ticket will be created.
 
             • Region should be the region of the server you wish to test on
 
